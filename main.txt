@@ -1,0 +1,33 @@
+Amir Shpilka
+Siddarth Krishna
+Michael Lukiman
+
+1) What is the smallest possible depth of a leaf in a decision tree for a comparison sort?
+	In a comparison sort, each permutation can be a unique path. The smallest possible depth corresponds to the depth of the tree. If the whole list is sorted already if would result in the fewest steps (the algorithm would just have to verify the order), so the algorithm would compare all elements and the element to the right until the n-1'th element. Therefore, the smallest depth is n-1 comparisons. 
+
+2) Show that there is no comparison sort whose running time is linear for at least half of the n! inputs of length n. What about a fraction of 1/n of the inputs of length n? What about a fraction of 1/2^n?
+	
+Case n!: From the Master Theorem, where n is the number of elements and r are the number of terminal leaves, n!/2 <= n! <= r <= n^h. Therefore,
+	log(n!)-1 = theta(nlogn)-1 = theta(nlogn)
+Case 1/n: Similarly, (1/n)n! <= n! <= r <= 2^h
+	Therefore, h >= log(n!/n)
+	log(n!)-logn=theta(n log(n))-log(n)
+	thea(nlogn)
+Case (1/2)^n: (1/2)^2 * n! <= n! <= r <= 2^h
+	h >= log(n!/2^h)
+	log(n!)-2 = theta(n log n) - n
+	theta(n log n)	
+2) Counting sort finds a range of discrete values by making a bin/element for each possible value in the list, adding 1 to the bin whenever a matching value is found. It performs as basically follows:
+	# find minmax
+	max = neg_inf
+	min = pos_inf
+	for element in list:
+		if element > max:
+			max = element
+		if element < min:
+			min = element
+	A = new_array(min=min, max=max)
+	for number in A:
+		A[number] = A[number] + 1
+	a) Therefore, the algorithm runs from left to right and appends to the bins in that order in one iteration. As a result, the elements if the same value have a preserved order, maintaining any external properties.
+	b)  
