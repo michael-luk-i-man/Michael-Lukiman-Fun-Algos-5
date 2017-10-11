@@ -3,7 +3,7 @@ Siddarth Krishna
 Michael Lukiman
 
 1) What is the smallest possible depth of a leaf in a decision tree for a comparison sort?
-	In a comparison sort, each permutation can be a unique path. The smallest possible depth corresponds to the depth of the tree. If the whole list is sorted already if would result in the fewest steps (the algorithm would just have to verify the order), so the algorithm would compare all elements and the element to the right until the n-1'th element. Therefore, the smallest depth is n-1 comparisons. 
+	In a comparison sort, each permutation of steps can be a unique path. The smallest possible amount of steps corresponds to the depth of the tree. If the whole list is sorted already if would result in the fewest steps (the algorithm would just have to verify the order), so the algorithm would compare all elements and the element to the right until the n-1'th element. Therefore, the smallest depth is n-1 comparisons. 
 
 2) Show that there is no comparison sort whose running time is linear for at least half of the n! inputs of length n. What about a fraction of 1/n of the inputs of length n? What about a fraction of 1/2^n?
 	
@@ -18,19 +18,82 @@ Case (1/2)^n: (1/2)^2 * n! <= n! <= r <= 2^h
 	log(n!)-2 = theta(n log n) - n
 	theta(n log n)	
 
-2) Counting sort finds a range of discrete values by making a bin/element for each possible value in the list, adding 1 to the bin whenever a matching value is found. It performs as basically follows:
+2) Counting sort finds a range of discrete values by making a bin/element for each possible value in the list, adding 1 to the bin whenever a matching value is found and then lumping them together. It performs as basically follows:
 	# find minmax
 	max = neg_inf
 	min = pos_inf
 	for element in list:
 		if element > max:
 			max = element
-		if element < min:
+		ig element < min:
 			min = element
 	A = new_array(min=min, max=max)
 	for number in A:
 		A[number] = A[number] + 1
-	a) Therefore, the algorithm runs from left to right and appends to the bins in that order in one iteration. As a result, the elements, if the same value, have a preserved order, maintaining any external properties they hold.
+	a) Therefore, the algorithm runs from left to right and appends to the bins in that order in one iteration. The bins are then read out not affecting the original stability. As a result, the elements, if the same value, have a preserved order, maintaining any external properties they hold.
 
+	b) Insertion sort is also stable because it spreads consecutively from left to right, with all leftmost arrays already sorted. Because of this elements will preserve their properties if holding the same value. Proof: With a list of n+1, the (n+1)'th element will find its place on the right of the value immediately lower or equal to it, but it will never be on the left of the value equal to it. This is in the 'if A[i] => key' conditional for insertion.
 
+	Merge sort is stable when it takes the smallest nontrivial array (two elements) and when merging uses a consistent left to right value preference <=. Therefore, like in the intermediate step of insertion sort, the (n+1)'th term would under these conditions would never be put to the left of an equal integer in an already sorted array. Again, this requires the conditional to query if the element is less or equal than instead of less than.
+ 
+	Quicksort is potentially unstable since the order of placement can be different if the pivot selected happens to be a number that is repeated. For example [5, 2-1, 2-2, 2-3, 0] (where x-n are the identifiers of the repeat values) if the pivot is 2-2 will be sorted to [0, 2-1, 2-3, 2-2, 5] or [0, 2-2, 2-3, 2-1, 5] depending on the side preference: it won't the maintain the order of the original 2-1, 2-2, 2-3.
 
+	c) Like above, we can add an additional signifier to 'earmark' repeat values. We can preprocess an array to append a temporary number system, for example converting [2,2,2] to [20,21,22] (we know this only works for up to 0-9 = ten repeat values, but this for now is for the sake of simplicity). Then we call quicksort, and after the call is complete, shear off the signifiers to convert back to [2,2,2]. (These steps would involve some num to str and str to num typecasting). Additional time would entirely be based on the proportion of repeat values, max +n for a largest or smallest worst case pivot and preprocessing a very large array. Space would be a few bits for adding signifiers to a very large array. For values that repeat more than ten times, you can first count them (r repeat values) and then add a decimal place based on r subdivisions. e.g. [2,2,2,2,2] to [2.0, 2.2, 2.4, 2.6, 2.8].  
+
+3) def count_in_range(A, k, a, b, k_start=0):
+	counter = [0] * (b-a+1) # makes an array of zeroes for [a,b] bins
+	for i in A: # for every element in the main array
+		if i >= a and i <= b: # if it's within the range
+			counter[i] += 1  # update the [a,b] bins
+
+	n_in_range = 0 
+	for bin_value in counter:
+		n_in_range += bin_value
+
+	return n_in_range
+
+Assuming counting sort to be true, this algorithm uses the same steps as counting sort with the sorting half removed, and a range conditional added. The running time would be one comparison (two technically) for every element in A (n) for an O(n) magnitude time. The n_in_range step just adds the final bin values with no comparisons, though we can also take that running time into account, which is +range[a,b].
+	
+4) bbwcltmsr(A): # blackbox worstcase lineartime median subroutine
+	....
+
+selection(A, ith):
+	median_index = ceil(len(A)/2)
+	bbwcltmsr(A)
+	if len(A) > 1:
+		if ith >= median_index:
+			R = A[median_index,len(A)-1]
+			selection(R, ith - median_index)
+	
+		if ith < median_index:
+			L = A[0,median_index-1]
+			selection(L, ith)
+
+	return A[ith]
+
+This is a recursive algorithm that uses the linear time median subroutine to do the equivalent of a binary search on the order statistics until the order statistic is its own median - therefore returning the ith order statistic. Therefore in the worst case the overtaking term is the median subroutine with time O(n) and the median recursion with log n. 
+
+We can also have a counting sort algorithm which finds the range of the array (and the non-integer values, if any) and then sorts the array per reading out the count bins (all linear time), simply returning the A[ith] element for linear time.
+
+5) 
+
+6) def ith_union(A,B,m,n,i):
+	j = k - 1 - i
+	i = floor( m / (m+n) * (k-1) ) 
+	
+	A_min = A[i-1]
+	B_min = B[j-1]
+	A_i = A[i]
+	B_j = B[j]
+
+	if B_min < A_i and B_j > A_i:
+		return A_i
+	elif A_min < B_j and A_i > B_j:
+		return B_j 
+
+	if A_i < B_j:
+		return ith_union(A+1+i,m-1-i,B,j,k-1-i)
+	else:
+		return ith_union(A,i,B+1+j,n-1-j,k-1-j)
+
+Similar to binary search, this recursive algorithm partitions arrays until it crunches to the single element where both partitions of arrays add up to k and one index is larger than the other (effectively, the kth largest element in the union of A and B). 
